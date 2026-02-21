@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 SpacemiT (Hangzhou) Technology Co. Ltd.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /**
  * AecDuplexProcessor Implementation
  *
@@ -7,15 +12,19 @@
  */
 
 #include "aec_duplex_processor.hpp"
-#include "audio_duplex_api.hpp"
-
-#include <iostream>
-#include <cstring>
-#include <cmath>
-#include <algorithm>
 
 // WebRTC includes
 #include <webrtc/modules/audio_processing/include/audio_processing.h>
+
+#include <algorithm>
+#include <cmath>
+#include <cstring>
+#include <iostream>
+#include <memory>
+#include <utility>
+#include <vector>
+
+#include "audio_duplex_api.hpp"
 
 // Frame size for WebRTC APM (10ms at 48kHz = 480 samples)
 constexpr int kFrameSizeMs = 10;
@@ -38,7 +47,6 @@ AecDuplexProcessor::AecDuplexProcessor(const Config& config)
     , audio_callback_(nullptr)
     , history_write_pos_(0)
     , delay_samples_(0) {
-
     // Pre-allocate buffers
     input_int16_.resize(config_.frames_per_buffer);
     output_int16_.resize(config_.frames_per_buffer);
@@ -120,13 +128,12 @@ bool AecDuplexProcessor::initialize() {
     std::cout << "[AecDuplex]   Gain Control: " << (config_.agc_enabled ? "ON" : "OFF") << std::endl;
     std::cout << "[AecDuplex]   High-pass Filter: " << (config_.highpass_enabled ? "ON" : "OFF") << std::endl;
     std::cout << "[AecDuplex]   Delay Compensation: " << config_.estimated_delay_ms << " ms ("
-              << delay_samples_ << " samples)" << std::endl;
+        << delay_samples_ << " samples)" << std::endl;
 
     // Create AudioDuplex
     duplex_ = std::make_unique<SpaceAudio::AudioDuplex>(
         config_.input_device,
-        config_.output_device
-    );
+        config_.output_device);
 
     // Set callback
     duplex_->SetCallback([this](const float* input, float* output, size_t frames, int channels) {
@@ -296,7 +303,6 @@ size_t AecDuplexProcessor::fillOutputBuffer(float* output, size_t frames) {
         // 如果有音频数据，输出带淡出的音频
         if (!current_playback_.samples.empty() &&
             current_playback_.position < current_playback_.samples.size()) {
-
             size_t samples_available = current_playback_.samples.size() - current_playback_.position;
             size_t samples_to_copy = std::min(frames, samples_available);
 
@@ -334,7 +340,6 @@ size_t AecDuplexProcessor::fillOutputBuffer(float* output, size_t frames) {
     // If current buffer is exhausted, get next from queue
     if (current_playback_.samples.empty() ||
         current_playback_.position >= current_playback_.samples.size()) {
-
         if (!playback_queue_.empty()) {
             current_playback_ = std::move(playback_queue_.front());
             playback_queue_.pop();
@@ -371,7 +376,7 @@ size_t AecDuplexProcessor::fillOutputBuffer(float* output, size_t frames) {
 
     // Update playing state: still playing if queue has data or current buffer has remaining data
     bool still_playing = !playback_queue_.empty() ||
-                         (current_playback_.position < current_playback_.samples.size());
+        (current_playback_.position < current_playback_.samples.size());
     is_playing_.store(still_playing);
 
     return samples_to_copy;
@@ -396,7 +401,7 @@ void AecDuplexProcessor::processInput(const float* input, const float* output_re
 
     // Process reverse stream (playback reference for AEC)
     apm_->ProcessReverseStream(output_int16_.data(), stream_config,
-                               stream_config, output_int16_.data());
+        stream_config, output_int16_.data());
 
     // Convert input to int16
     for (size_t i = 0; i < frames; ++i) {
@@ -431,7 +436,7 @@ void AecDuplexProcessor::enqueuePlayback(const float* samples, size_t count, int
     // Resample to 48kHz if needed
     if (sample_rate != config_.sample_rate) {
         resampled = resample(std::vector<float>(samples, samples + count),
-                             sample_rate, config_.sample_rate);
+            sample_rate, config_.sample_rate);
     } else {
         resampled.assign(samples, samples + count);
     }
@@ -463,7 +468,7 @@ size_t AecDuplexProcessor::getPlaybackQueueSize() const {
 // ============================================================================
 
 std::vector<float> AecDuplexProcessor::resample(const std::vector<float>& input,
-                                                 int from_rate, int to_rate) {
+        int from_rate, int to_rate) {
     if (from_rate == to_rate || input.empty()) {
         return input;
     }
@@ -480,8 +485,7 @@ std::vector<float> AecDuplexProcessor::resample(const std::vector<float>& input,
 
         if (src_idx + 1 < input.size()) {
             output[i] = static_cast<float>(
-                input[src_idx] * (1.0 - frac) + input[src_idx + 1] * frac
-            );
+                input[src_idx] * (1.0 - frac) + input[src_idx + 1] * frac);
         } else if (src_idx < input.size()) {
             output[i] = input[src_idx];
         } else {

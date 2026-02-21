@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 SpacemiT (Hangzhou) Technology Co. Ltd.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /**
  * AecDuplexProcessor - AEC processor using AudioDuplex
  *
@@ -17,7 +22,8 @@
  *   processor.enqueuePlayback(tts_samples, tts_sample_rate);
  */
 
-#pragma once
+#ifndef AEC_DUPLEX_PROCESSOR_HPP
+#define AEC_DUPLEX_PROCESSOR_HPP
 
 #include <vector>
 #include <queue>
@@ -28,6 +34,7 @@
 #include <string>
 #include <thread>
 #include <condition_variable>
+#include <utility>
 
 // Forward declarations
 namespace webrtc {
@@ -232,3 +239,5 @@ private:
     std::atomic<int> fade_out_frames_{0};
     static constexpr int kFadeOutFrames = 5;  // 淡出 5 帧 (~50ms @ 480 samples/frame)
 };
+
+#endif  // AEC_DUPLEX_PROCESSOR_HPP

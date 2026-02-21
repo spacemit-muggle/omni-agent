@@ -1,4 +1,10 @@
-#pragma once
+/*
+ * Copyright (C) 2026 SpacemiT (Hangzhou) Technology Co. Ltd.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#ifndef TEXT_BUFFER_HPP
+#define TEXT_BUFFER_HPP
 
 #include <queue>
 #include <string>
@@ -14,29 +20,31 @@ public:
 
     // Add streaming text to buffer
     void addText(const std::string& text);
-    
+
     // Get next complete sentence (if available)
     std::string getNextSentence();
-    
+
     // Check if there are complete sentences available
     bool hasSentence() const;
-    
+
     // Clear all buffered text
     void clear();
-    
+
     // Stop buffer processing
     void stop();
 
 private:
     void processBuffer();
     bool isEndOfSentence(char c) const;
-    
+
     std::string buffer_;
     std::queue<std::string> sentences_;
     mutable std::mutex mutex_;
     std::condition_variable cv_;
     std::atomic<bool> stop_flag_;
-    
+
     // Chinese punctuation patterns
-    static const std::string CHINESE_PUNCTUATION;
+    static const char CHINESE_PUNCTUATION[];
 };
+
+#endif  // TEXT_BUFFER_HPP

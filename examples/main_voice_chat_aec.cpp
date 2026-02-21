@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 SpacemiT (Hangzhou) Technology Co. Ltd.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /**
  * 带 AEC 的语音对话系统 Demo (全双工模式)
  *
@@ -56,9 +61,9 @@
 
 // MCP SDK (可选)
 #ifdef USE_MCP
-#include <mcp_api.hpp>
 #include <curl/curl.h>
 #include <map>
+#include <mcp_api.hpp>
 #endif
 
 // ============================================================================
@@ -192,62 +197,62 @@ std::string resolveVoiceName(const std::string& input) {
 
     // No match — might be a valid voice not in our list, pass through
     std::cerr << "警告: 未知音色 '" << input << "'，将直接使用该名称\n"
-              << "使用 --list-voices 查看可用音色列表\n";
+        << "使用 --list-voices 查看可用音色列表\n";
     return input;
 }
 
 void printVoiceList() {
     std::cout << "Kokoro 可用音色列表:\n"
-              << "\n"
-              << "中文女声 (zf_):\n"
-              << "  zf_xiaobei      小北 (默认)\n"
-              << "  zf_xiaoni       小妮\n"
-              << "  zf_xiaoxiao     小小\n"
-              << "  zf_xiaoyi       小一\n"
-              << "\n"
-              << "中文男声 (zm_):\n"
-              << "  zm_yunxi        云希\n"
-              << "  zm_yunyang      云阳\n"
-              << "  zm_yunjian      云健\n"
-              << "  zm_yunfan       云帆\n"
-              << "\n"
-              << "美式英语女声 (af_):\n"
-              << "  af_heart        Heart\n"
-              << "  af_alloy        Alloy\n"
-              << "  af_aoede        Aoede\n"
-              << "  af_bella        Bella\n"
-              << "  af_jessica      Jessica\n"
-              << "  af_kore         Kore\n"
-              << "  af_nicole       Nicole\n"
-              << "  af_nova         Nova\n"
-              << "  af_river        River\n"
-              << "  af_sarah        Sarah\n"
-              << "  af_sky          Sky\n"
-              << "\n"
-              << "美式英语男声 (am_):\n"
-              << "  am_adam         Adam\n"
-              << "  am_echo         Echo\n"
-              << "  am_eric         Eric\n"
-              << "  am_fenrir       Fenrir\n"
-              << "  am_liam         Liam\n"
-              << "  am_michael      Michael\n"
-              << "  am_onyx         Onyx\n"
-              << "  am_puck         Puck\n"
-              << "\n"
-              << "英式英语女声 (bf_):\n"
-              << "  bf_alice        Alice\n"
-              << "  bf_emma         Emma\n"
-              << "  bf_isabella     Isabella\n"
-              << "  bf_lily         Lily\n"
-              << "\n"
-              << "英式英语男声 (bm_):\n"
-              << "  bm_daniel       Daniel\n"
-              << "  bm_fable        Fable\n"
-              << "  bm_george       George\n"
-              << "  bm_lewis        Lewis\n"
-              << "\n"
-              << "用法: --tts kokoro:<voice>  支持短名 (xiaobei) 和全名 (zf_xiaobei)\n"
-              << std::endl;
+        << "\n"
+        << "中文女声 (zf_):\n"
+        << "  zf_xiaobei      小北 (默认)\n"
+        << "  zf_xiaoni       小妮\n"
+        << "  zf_xiaoxiao     小小\n"
+        << "  zf_xiaoyi       小一\n"
+        << "\n"
+        << "中文男声 (zm_):\n"
+        << "  zm_yunxi        云希\n"
+        << "  zm_yunyang      云阳\n"
+        << "  zm_yunjian      云健\n"
+        << "  zm_yunfan       云帆\n"
+        << "\n"
+        << "美式英语女声 (af_):\n"
+        << "  af_heart        Heart\n"
+        << "  af_alloy        Alloy\n"
+        << "  af_aoede        Aoede\n"
+        << "  af_bella        Bella\n"
+        << "  af_jessica      Jessica\n"
+        << "  af_kore         Kore\n"
+        << "  af_nicole       Nicole\n"
+        << "  af_nova         Nova\n"
+        << "  af_river        River\n"
+        << "  af_sarah        Sarah\n"
+        << "  af_sky          Sky\n"
+        << "\n"
+        << "美式英语男声 (am_):\n"
+        << "  am_adam         Adam\n"
+        << "  am_echo         Echo\n"
+        << "  am_eric         Eric\n"
+        << "  am_fenrir       Fenrir\n"
+        << "  am_liam         Liam\n"
+        << "  am_michael      Michael\n"
+        << "  am_onyx         Onyx\n"
+        << "  am_puck         Puck\n"
+        << "\n"
+        << "英式英语女声 (bf_):\n"
+        << "  bf_alice        Alice\n"
+        << "  bf_emma         Emma\n"
+        << "  bf_isabella     Isabella\n"
+        << "  bf_lily         Lily\n"
+        << "\n"
+        << "英式英语男声 (bm_):\n"
+        << "  bm_daniel       Daniel\n"
+        << "  bm_fable        Fable\n"
+        << "  bm_george       George\n"
+        << "  bm_lewis        Lewis\n"
+        << "\n"
+        << "用法: --tts kokoro:<voice>  支持短名 (xiaobei) 和全名 (zf_xiaobei)\n"
+        << std::endl;
 }
 
 EngineSelection parseEngine(const std::string& spec) {
@@ -268,7 +273,7 @@ EngineSelection parseEngine(const std::string& spec) {
             sel.backend = SpacemiT::BackendType::MATCHA_ZH_EN;
         } else {
             std::cerr << "错误: 未知 Matcha 变体 '" << variant << "'\n"
-                      << "可用变体: zh, en, zh-en\n";
+                << "可用变体: zh, en, zh-en\n";
             exit(1);
         }
         return sel;
@@ -281,8 +286,8 @@ EngineSelection parseEngine(const std::string& spec) {
     }
 
     std::cerr << "错误: 未知引擎 '" << engine << "'\n"
-              << "可用引擎: matcha, kokoro\n"
-              << "用法: --tts matcha:zh 或 --tts kokoro:zf_xiaobei\n";
+        << "可用引擎: matcha, kokoro\n"
+        << "用法: --tts matcha:zh 或 --tts kokoro:zf_xiaobei\n";
     exit(1);
 }
 
@@ -356,31 +361,31 @@ Config parseArgs(int argc, char* argv[]) {
             cfg.list_voices = true;
         } else if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
             std::cout << "用法: " << argv[0] << " [选项]\n"
-                      << "\n音频设备:\n"
-                      << "  -i, --input-device <id>   输入设备索引 (默认: 系统默认)\n"
-                      << "  -o, --output-device <id>  输出设备索引 (默认: 系统默认)\n"
-                      << "  -l, --list-devices        列出可用音频设备\n"
-                      << "\nLLM:\n"
-                      << "  --model <name>            LLM模型 (默认: qwen2.5:0.5b)\n"
-                      << "  --llm-url <url>           LLM API地址 (默认: 使用ollama)\n"
-                      << "\nTTS:\n"
-                      << "  --tts <engine>            TTS后端 (默认: matcha:zh)\n"
-                      << "                            matcha:zh / matcha:en / matcha:zh-en\n"
-                      << "                            kokoro / kokoro:<voice>\n"
-                      << "  --list-voices             列出 Kokoro 可用音色\n"
-                      << "\nAEC:\n"
-                      << "  --no-aec                  禁用回声消除\n"
-                      << "  --no-ns                   禁用噪声抑制\n"
-                      << "  --agc                     启用自动增益控制 (默认禁用)\n"
-                      << "  --aec-delay <ms>          AEC延迟补偿 (默认: 50ms, 范围: 20-100ms)\n"
-                      << "  --buffer-frames <n>       音频缓冲帧数 (默认: macOS 480, Linux 960)\n"
-                      << "  --sample-rate <hz>        音频采样率 (默认: 48000, 常用: 44100, 48000)\n"
-                      << "\n调试:\n"
-                      << "  --save-audio [file]       保存AEC处理后的音频 (默认: aec_debug.wav)\n"
-                      << "\nMCP:\n"
-                      << "  --mcp-config <path>       MCP配置文件 (启用工具调用)\n"
-                      << "\n其他:\n"
-                      << "  -h, --help                显示帮助\n";
+                << "\n音频设备:\n"
+                << "  -i, --input-device <id>   输入设备索引 (默认: 系统默认)\n"
+                << "  -o, --output-device <id>  输出设备索引 (默认: 系统默认)\n"
+                << "  -l, --list-devices        列出可用音频设备\n"
+                << "\nLLM:\n"
+                << "  --model <name>            LLM模型 (默认: qwen2.5:0.5b)\n"
+                << "  --llm-url <url>           LLM API地址 (默认: 使用ollama)\n"
+                << "\nTTS:\n"
+                << "  --tts <engine>            TTS后端 (默认: matcha:zh)\n"
+                << "                            matcha:zh / matcha:en / matcha:zh-en\n"
+                << "                            kokoro / kokoro:<voice>\n"
+                << "  --list-voices             列出 Kokoro 可用音色\n"
+                << "\nAEC:\n"
+                << "  --no-aec                  禁用回声消除\n"
+                << "  --no-ns                   禁用噪声抑制\n"
+                << "  --agc                     启用自动增益控制 (默认禁用)\n"
+                << "  --aec-delay <ms>          AEC延迟补偿 (默认: 50ms, 范围: 20-100ms)\n"
+                << "  --buffer-frames <n>       音频缓冲帧数 (默认: macOS 480, Linux 960)\n"
+                << "  --sample-rate <hz>        音频采样率 (默认: 48000, 常用: 44100, 48000)\n"
+                << "\n调试:\n"
+                << "  --save-audio [file]       保存AEC处理后的音频 (默认: aec_debug.wav)\n"
+                << "\nMCP:\n"
+                << "  --mcp-config <path>       MCP配置文件 (启用工具调用)\n"
+                << "\n其他:\n"
+                << "  -h, --help                显示帮助\n";
             exit(0);
         }
     }
@@ -403,7 +408,7 @@ struct MCPConfig {
     int timeout = 120;
     std::string system_prompt = "你是一个智能助手，可以使用工具帮助用户。请用中文回复。";
     std::string registry_url = "";  // 注册中心 URL (可选)
-    int registry_poll_interval = 5; // 轮询间隔 (秒)
+    int registry_poll_interval = 5;  // 轮询间隔 (秒)
 
     struct ServerEntry {
         std::string name;
@@ -499,8 +504,10 @@ std::vector<MCPConfig::ServerEntry> fetchServicesFromRegistry(const std::string&
     curl_easy_setopt(curl, CURLOPT_URL, registry_url.c_str());
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
     curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);  // 强制 IPv4，避免 Linux IPv6 问题
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, +[](void* ptr, size_t size, size_t nmemb, void* userdata) -> size_t {
-        ((std::string*)userdata)->append((char*)ptr, size * nmemb);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
+        +[](void* ptr, size_t size, size_t nmemb, void* userdata) -> size_t {
+        (reinterpret_cast<std::string*>(userdata))->append(
+            reinterpret_cast<char*>(ptr), size * nmemb);
         return size * nmemb;
     });
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_data);
@@ -526,7 +533,7 @@ std::vector<MCPConfig::ServerEntry> fetchServicesFromRegistry(const std::string&
     return services;
 }
 
-#endif // USE_MCP
+#endif  // USE_MCP
 
 // ============================================================================
 // 列出音频设备
@@ -609,8 +616,7 @@ std::vector<float> resampleToAec(const std::vector<float>& input, int from_rate,
 
         if (src_idx + 1 < input.size()) {
             output[i] = static_cast<float>(
-                input[src_idx] * (1.0 - frac) + input[src_idx + 1] * frac
-            );
+                input[src_idx] * (1.0 - frac) + input[src_idx + 1] * frac);
         } else if (src_idx < input.size()) {
             output[i] = input[src_idx];
         }
@@ -892,18 +898,24 @@ int main(int argc, char* argv[]) {
                     mcp::HttpConfig hc;
                     hc.url = srv.url;
                     mcp_manager->addHttpServer(srv.name, hc);
-                    std::cout << getTimestamp() << " [MCP] 添加服务器: " << srv.name << " (http: " << srv.url << ")\n";
+                    std::cout << getTimestamp()
+                        << " [MCP] 添加服务器: " << srv.name
+                        << " (http: " << srv.url << ")\n";
                 } else if (srv.type == "stdio") {
                     mcp::StdioConfig sc;
                     sc.command = srv.command;
                     sc.args = srv.args;
                     mcp_manager->addStdioServer(srv.name, sc);
-                    std::cout << getTimestamp() << " [MCP] 添加服务器: " << srv.name << " (stdio: " << srv.command << ")\n";
+                    std::cout << getTimestamp()
+                        << " [MCP] 添加服务器: " << srv.name
+                        << " (stdio: " << srv.command << ")\n";
                 } else if (srv.type == "socket") {
                     mcp::UnixSocketConfig uc;
                     uc.socketPath = srv.socketPath;
                     mcp_manager->addUnixSocketServer(srv.name, uc);
-                    std::cout << getTimestamp() << " [MCP] 添加服务器: " << srv.name << " (socket: " << srv.socketPath << ")\n";
+                    std::cout << getTimestamp()
+                        << " [MCP] 添加服务器: " << srv.name
+                        << " (socket: " << srv.socketPath << ")\n";
                 }
             }
 
@@ -917,7 +929,9 @@ int main(int argc, char* argv[]) {
                         mcp::HttpConfig hc;
                         hc.url = srv.url;
                         mcp_manager->addHttpServer(srv.name, hc);
-                        std::cout << getTimestamp() << " [MCP] 添加服务器: " << srv.name << " (http: " << srv.url << ")\n";
+                        std::cout << getTimestamp()
+                            << " [MCP] 添加服务器: " << srv.name
+                            << " (http: " << srv.url << ")\n";
                     }
                 }
             }
@@ -930,8 +944,9 @@ int main(int argc, char* argv[]) {
                 // 获取工具列表
                 auto tools = mcp_manager->getAllTools();
                 llm_tools_json = convertMCPToolsToString(tools);
-                std::cout << getTimestamp() << " [MCP] 已连接 " << mcp_manager->readyServerCount()
-                          << " 个服务器, " << tools.size() << " 个工具\n";
+                std::cout << getTimestamp() << " [MCP] 已连接 "
+                    << mcp_manager->readyServerCount()
+                    << " 个服务器, " << tools.size() << " 个工具\n";
             } else {
                 std::cout << getTimestamp() << " [MCP] 警告: 无可用服务器，继续等待...\n";
             }
@@ -966,10 +981,9 @@ int main(int argc, char* argv[]) {
                                     to_remove.push_back(name);
                                     std::cout << "\n" << getTimestamp() << " [MCP] 服务已下线: " << name << "\n";
                                 }
-                            }
-                            // 服务在注册中心但状态异常 -> 尝试重连
-                            else if (status.state == mcp::ServerState::Error ||
-                                     status.state == mcp::ServerState::Disconnected) {
+                            } else if (status.state == mcp::ServerState::Error ||
+                                status.state == mcp::ServerState::Disconnected) {
+                                // 服务在注册中心但状态异常 -> 尝试重连
                                 std::cout << "\n" << getTimestamp() << " [MCP] 尝试重连: " << name << "\n";
                                 mcp_manager->startServer(name);
                             }
@@ -992,7 +1006,9 @@ int main(int argc, char* argv[]) {
                                 mcp_manager->startServer(srv.name);
                                 known_servers.insert(srv.name);
                                 new_services_added = true;
-                                std::cout << "\n" << getTimestamp() << " [MCP] 发现新服务: " << srv.name << " (" << srv.url << ")\n";
+                                std::cout << "\n" << getTimestamp()
+                                    << " [MCP] 发现新服务: " << srv.name
+                                    << " (" << srv.url << ")\n";
                             }
                         }
 
@@ -1017,7 +1033,7 @@ int main(int argc, char* argv[]) {
             std::cout << getTimestamp() << " [MCP] 配置加载失败，使用默认 LLM\n\n";
         }
     }
-#endif // USE_MCP
+#endif  // USE_MCP
 
     // -------------------------------------------------------------------------
     // 状态变量
@@ -1025,7 +1041,8 @@ int main(int argc, char* argv[]) {
     std::vector<float> audio_buffer;
     std::mutex buffer_mutex;
     int silence_frames = 0;
-    const int silence_frames_threshold = static_cast<int>(cfg.silence_duration * 16000 / 512);  // 512 samples per VAD frame
+    const int silence_frames_threshold =
+        static_cast<int>(cfg.silence_duration * 16000 / 512);  // 512 samples per VAD frame
     bool is_speaking = false;
     int frame_count = 0;
 
@@ -1128,8 +1145,7 @@ int main(int argc, char* argv[]) {
                         }
                         return true;
                     },
-                    current_tools
-                );
+                    current_tools);
 
                 std::cout << std::endl;
 
@@ -1157,7 +1173,8 @@ int main(int argc, char* argv[]) {
 
                             std::string server = mcp_manager->findServerForTool(tool_name);
                             std::cout << getTimestamp() << " [MCP] 调用: " << tool_name
-                                      << " @ " << server << " 参数: " << tool_args.dump() << std::endl;
+                                << " @ " << server << " 参数: "
+                                << tool_args.dump() << std::endl;
 
                             auto tool_result = mcp_manager->callTool(tool_name, tool_args);
 
@@ -1201,9 +1218,10 @@ int main(int argc, char* argv[]) {
                 }
                 break;
             }
-        } else
-#endif // USE_MCP
+        } else {
+#else
         {
+#endif  // USE_MCP
             // 非 MCP 模式：使用 chat_stream 统一调用
             std::cout << getTimestamp() << " [LLM] 开始生成...\n";
             std::cout << getTimestamp() << " [AI]: " << std::flush;
@@ -1285,7 +1303,7 @@ int main(int argc, char* argv[]) {
 
         g_processing = false;
         std::cout << getTimestamp() << " [等待语音输入...]\n" << std::flush;
-    };
+    };  // NOLINT(readability/braces)
 
     // -------------------------------------------------------------------------
     // 设置 AEC 处理器回调
@@ -1322,11 +1340,11 @@ int main(int argc, char* argv[]) {
             frame_count++;
             if (frame_count % 10 == 0 && !g_processing) {
                 std::cout << "\r" << getTimestamp() << " [VAD] prob=" << std::fixed
-                          << std::setprecision(2) << vad_prob
-                          << " speaking=" << (is_speaking ? "Y" : "N")
-                          << " buffer=" << audio_buffer.size()
-                          << " playing=" << (aec_processor.isPlaying() ? "Y" : "N")
-                          << "      " << std::flush;
+                    << std::setprecision(2) << vad_prob
+                    << " speaking=" << (is_speaking ? "Y" : "N")
+                    << " buffer=" << audio_buffer.size()
+                    << " playing=" << (aec_processor.isPlaying() ? "Y" : "N")
+                    << "      " << std::flush;
             }
 
             // TTS 播放期间：检测 barge-in（需要连续多帧确认，避免假阳性）
@@ -1360,7 +1378,8 @@ int main(int argc, char* argv[]) {
 
                     if (barge_in_confirm_frames >= BARGE_IN_CONFIRM_THRESHOLD) {
                         std::cout << "\n" << getTimestamp() << " [Barge-in] 用户打断 (连续"
-                                  << barge_in_confirm_frames << "帧, prob=" << vad_prob << ")，停止播放\n";
+                            << barge_in_confirm_frames << "帧, prob=" << vad_prob
+                            << ")，停止播放\n";
                         aec_processor.clearPlayback();
                         g_barge_in = true;
                         barge_in_recording = true;  // 开始 barge-in 录音模式
@@ -1497,13 +1516,11 @@ int main(int argc, char* argv[]) {
     // 保存录制的音频
     if (cfg.save_audio && !recorded_audio.empty()) {
         std::cout << getTimestamp() << " [保存音频] " << cfg.audio_file
-                  << " (" << recorded_audio.size() << " samples, "
-                  << (recorded_audio.size() / 16000.0f) << " 秒)\n";
+            << " (" << recorded_audio.size() << " samples, "
+            << (recorded_audio.size() / 16000.0f) << " 秒)\n";
         saveWav(cfg.audio_file, recorded_audio, 16000);
     }
 
     std::cout << "\n" << getTimestamp() << " [已退出]\n";
     return 0;
 }
-
-
