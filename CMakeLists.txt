@@ -84,105 +84,203 @@ else()
 endif()
 
 # Options
-option(USE_MCP "Enable MCP (Model Context Protocol) support" OFF)
+option(USE_MCP "Enable MCP (Model Context Protocol) support" ON)
 option(USE_AEC "Enable WebRTC AEC (Acoustic Echo Cancellation) for barge-in support" ON)
-
-# Add mcp library (Model Context Protocol)
-if(USE_MCP)
-    set(MCP_BUILD_EXAMPLES OFF CACHE BOOL "Disable MCP examples" FORCE)
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../mcp ${CMAKE_BINARY_DIR}/_deps/mcp)
-    message(STATUS "MCP support enabled")
-endif()
 
 # Include directories
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/inc)
 include_directories(${ONNXRUNTIME_INCLUDE_DIR})
 include_directories(${FFTW3_INCLUDE_DIRS})
 
-# WebRTC Audio Processing for AEC
-if(USE_AEC)
-    set(WEBRTC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/webrtc-audio-processing)
-    set(WEBRTC_BUILD_DIR ${WEBRTC_DIR}/build)
+# ============================================================================
+# Build mode detection: SDK vs Standalone
+#
+# SDK mode:        dependencies are pre-built and installed to CMAKE_PREFIX_PATH
+#                  (triggered by: lunch k3-com260-voice-agent && ./build/build.sh cmake)
+# Standalone mode: dependencies are built from source via add_subdirectory
+#                  (triggered by: cmake -B build && make -C build)
+# ============================================================================
+find_library(_PROBE_SPACE_AUDIO NAMES space_audio QUIET)
+if(_PROBE_SPACE_AUDIO)
+    set(VOICE_AGENT_SDK_MODE TRUE)
+    message(STATUS "Build mode: SDK (using pre-built libraries from CMAKE_PREFIX_PATH)")
+else()
+    set(VOICE_AGENT_SDK_MODE FALSE)
+    message(STATUS "Build mode: Standalone (building dependencies from source)")
+endif()
+unset(_PROBE_SPACE_AUDIO CACHE)
 
-    # Check if WebRTC is built
-    if(NOT EXISTS ${WEBRTC_BUILD_DIR}/webrtc/modules/audio_processing/libwebrtc-audio-processing-2.dylib AND
-       NOT EXISTS ${WEBRTC_BUILD_DIR}/webrtc/modules/audio_processing/libwebrtc-audio-processing-2.so)
-        message(FATAL_ERROR "WebRTC Audio Processing not built. Please run: cd thirdparty/webrtc-audio-processing && meson build && ninja -C build")
+# ============================================================================
+# Resolve component dependencies
+# ============================================================================
+if(VOICE_AGENT_SDK_MODE)
+    # --- SDK mode: find pre-built libraries ---
+
+    # audio
+    find_library(SPACE_AUDIO_LIB NAMES space_audio REQUIRED)
+    find_library(AUDIO_RESAMPLER_LIB NAMES audio_resampler REQUIRED)
+    find_path(AUDIO_INCLUDE_DIR NAMES audio_duplex_api.hpp REQUIRED)
+
+    # stt
+    find_library(STT_LIB NAMES stt REQUIRED)
+    find_library(SENSEVOICE_LIB NAMES sensevoice REQUIRED)
+    find_path(STT_INCLUDE_DIR NAMES stt_api.hpp REQUIRED)
+
+    # tts (headers installed to include/tts/)
+    find_library(TTS_LIB NAMES tts REQUIRED)
+    find_path(TTS_INCLUDE_DIR NAMES tts_api.hpp PATH_SUFFIXES tts REQUIRED)
+
+    # vad
+    find_library(VAD_LIB NAMES vad REQUIRED)
+    find_library(SILERO_VAD_LIB NAMES silero_vad REQUIRED)
+    find_path(VAD_INCLUDE_DIR NAMES vad_api.hpp REQUIRED)
+
+    # llm
+    find_library(LLM_LIB NAMES llm_service_cpp REQUIRED)
+    find_path(LLM_INCLUDE_DIR NAMES llm_service.h REQUIRED)
+
+    # mcp
+    if(USE_MCP)
+        find_library(MCP_LIB NAMES mcp REQUIRED)
+        find_path(MCP_INCLUDE_DIR NAMES mcp_api.hpp REQUIRED)
+        find_package(nlohmann_json QUIET)
+        if(NOT nlohmann_json_FOUND)
+            find_path(NLOHMANN_JSON_INCLUDE_DIR NAMES nlohmann/json.hpp)
+        endif()
+        message(STATUS "MCP support enabled")
     endif()
 
-    # Find abseil (required by WebRTC)
-    if(APPLE)
-        execute_process(
-            COMMAND brew --prefix abseil
-            OUTPUT_VARIABLE ABSEIL_PREFIX
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-            ERROR_QUIET
+else()
+    # --- Standalone mode: build from source via add_subdirectory ---
+
+    # Disable submodule optional builds
+    set(AUDIO_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(AUDIO_BUILD_PYTHON OFF CACHE BOOL "" FORCE)
+    set(BUILD_STREAM_DEMO OFF CACHE BOOL "" FORCE)
+    set(BUILD_PYTHON_BINDINGS OFF CACHE BOOL "" FORCE)
+    set(BUILD_SIMPLE_DEMO OFF CACHE BOOL "" FORCE)
+    set(BUILD_VAD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(BUILD_VAD_PYTHON OFF CACHE BOOL "" FORCE)
+    set(BUILD_LLM_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(BUILD_SHARED_LIB OFF CACHE BOOL "Force static LLM library" FORCE)
+
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../multimedia/audio ${CMAKE_BINARY_DIR}/_deps/audio)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../model_zoo/stt ${CMAKE_BINARY_DIR}/_deps/stt)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../model_zoo/tts ${CMAKE_BINARY_DIR}/_deps/tts)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../model_zoo/vad ${CMAKE_BINARY_DIR}/_deps/vad)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../model_zoo/llm ${CMAKE_BINARY_DIR}/_deps/llm)
+
+    if(USE_MCP)
+        set(MCP_BUILD_EXAMPLES OFF CACHE BOOL "Disable MCP examples" FORCE)
+        add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../mcp ${CMAKE_BINARY_DIR}/_deps/mcp)
+        message(STATUS "MCP support enabled")
+    endif()
+endif()
+
+# ============================================================================
+# WebRTC Audio Processing for AEC
+# ============================================================================
+if(USE_AEC)
+    if(VOICE_AGENT_SDK_MODE)
+        # SDK mode: find installed library
+        find_library(WEBRTC_LIB NAMES webrtc-audio-processing-2 REQUIRED)
+
+        # build.sh creates symlink PREFIX/include/webrtc -> webrtc-audio-processing-2
+        find_path(WEBRTC_INCLUDE_DIR
+            NAMES webrtc/modules/audio_processing/include/audio_processing.h
+            REQUIRED
         )
-        if(ABSEIL_PREFIX)
-            set(ABSEIL_INCLUDE_DIR ${ABSEIL_PREFIX}/include)
-        else()
-            set(ABSEIL_INCLUDE_DIR /opt/homebrew/include)
-        endif()
-    else()
-        find_path(ABSEIL_INCLUDE_DIR absl/base/config.h
+
+        # Abseil (may be bundled in PREFIX or system-installed)
+        find_path(ABSEIL_INCLUDE_DIR NAMES absl/base/config.h
             PATHS
+            ${CMAKE_PREFIX_PATH}/include
             /usr/include
             /usr/local/include
-            ${WEBRTC_BUILD_DIR}/subprojects/abseil-cpp-20240722.0
-            ${WEBRTC_BUILD_DIR}/subprojects/abseil-cpp
         )
+        if(APPLE AND NOT ABSEIL_INCLUDE_DIR)
+            execute_process(
+                COMMAND brew --prefix abseil
+                OUTPUT_VARIABLE ABSEIL_PREFIX
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+                ERROR_QUIET
+            )
+            if(ABSEIL_PREFIX)
+                set(ABSEIL_INCLUDE_DIR ${ABSEIL_PREFIX}/include)
+            else()
+                set(ABSEIL_INCLUDE_DIR /opt/homebrew/include)
+            endif()
+        endif()
         if(NOT ABSEIL_INCLUDE_DIR)
             message(FATAL_ERROR "Abseil not found. Install with: sudo apt install libabsl-dev")
         endif()
-    endif()
 
-    # WebRTC include directories
-    set(WEBRTC_INCLUDE_DIRS
-        ${WEBRTC_DIR}
-        ${WEBRTC_DIR}/webrtc
-        ${WEBRTC_BUILD_DIR}
-        ${WEBRTC_BUILD_DIR}/webrtc
-        ${ABSEIL_INCLUDE_DIR}
-    )
-
-    # WebRTC library
-    if(APPLE)
-        set(WEBRTC_LIB ${WEBRTC_BUILD_DIR}/webrtc/modules/audio_processing/libwebrtc-audio-processing-2.dylib)
+        set(WEBRTC_INCLUDE_DIRS
+            ${WEBRTC_INCLUDE_DIR}
+            ${WEBRTC_INCLUDE_DIR}/webrtc
+            ${ABSEIL_INCLUDE_DIR}
+        )
     else()
-        set(WEBRTC_LIB ${WEBRTC_BUILD_DIR}/webrtc/modules/audio_processing/libwebrtc-audio-processing-2.so)
+        # Standalone mode: use source tree paths
+        set(WEBRTC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/webrtc-audio-processing)
+        set(WEBRTC_BUILD_DIR ${WEBRTC_DIR}/build)
+
+        # Check if WebRTC is built
+        if(NOT EXISTS ${WEBRTC_BUILD_DIR}/webrtc/modules/audio_processing/libwebrtc-audio-processing-2.dylib AND
+           NOT EXISTS ${WEBRTC_BUILD_DIR}/webrtc/modules/audio_processing/libwebrtc-audio-processing-2.so)
+            message(FATAL_ERROR "WebRTC Audio Processing not built. Please run: cd thirdparty/webrtc-audio-processing && meson build && ninja -C build")
+        endif()
+
+        # Find abseil
+        if(APPLE)
+            execute_process(
+                COMMAND brew --prefix abseil
+                OUTPUT_VARIABLE ABSEIL_PREFIX
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+                ERROR_QUIET
+            )
+            if(ABSEIL_PREFIX)
+                set(ABSEIL_INCLUDE_DIR ${ABSEIL_PREFIX}/include)
+            else()
+                set(ABSEIL_INCLUDE_DIR /opt/homebrew/include)
+            endif()
+        else()
+            find_path(ABSEIL_INCLUDE_DIR absl/base/config.h
+                PATHS
+                /usr/include
+                /usr/local/include
+                ${WEBRTC_BUILD_DIR}/subprojects/abseil-cpp-20240722.0
+                ${WEBRTC_BUILD_DIR}/subprojects/abseil-cpp
+            )
+            if(NOT ABSEIL_INCLUDE_DIR)
+                message(FATAL_ERROR "Abseil not found. Install with: sudo apt install libabsl-dev")
+            endif()
+        endif()
+
+        set(WEBRTC_INCLUDE_DIRS
+            ${WEBRTC_DIR}
+            ${WEBRTC_DIR}/webrtc
+            ${WEBRTC_BUILD_DIR}
+            ${WEBRTC_BUILD_DIR}/webrtc
+            ${ABSEIL_INCLUDE_DIR}
+        )
+
+        if(APPLE)
+            set(WEBRTC_LIB ${WEBRTC_BUILD_DIR}/webrtc/modules/audio_processing/libwebrtc-audio-processing-2.dylib)
+        else()
+            set(WEBRTC_LIB ${WEBRTC_BUILD_DIR}/webrtc/modules/audio_processing/libwebrtc-audio-processing-2.so)
+        endif()
     endif()
 
     message(STATUS "WebRTC AEC support enabled")
-    message(STATUS "WebRTC include dirs: ${WEBRTC_INCLUDE_DIRS}")
-    message(STATUS "Abseil include dir: ${ABSEIL_INCLUDE_DIR}")
     message(STATUS "WebRTC library: ${WEBRTC_LIB}")
+    message(STATUS "WebRTC include dirs: ${WEBRTC_INCLUDE_DIRS}")
 endif()
 
 # Copy models directory if it exists
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/models)
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/models DESTINATION ${CMAKE_BINARY_DIR})
 endif()
-
-# ============================================================================
-# Modular libraries (now from independent repos via relative paths)
-# ============================================================================
-
-# Disable submodule optional builds (demos, examples, python bindings)
-set(AUDIO_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(AUDIO_BUILD_PYTHON OFF CACHE BOOL "" FORCE)
-set(BUILD_STREAM_DEMO OFF CACHE BOOL "" FORCE)
-set(BUILD_PYTHON_BINDINGS OFF CACHE BOOL "" FORCE)
-set(BUILD_SIMPLE_DEMO OFF CACHE BOOL "" FORCE)
-set(BUILD_VAD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(BUILD_VAD_PYTHON OFF CACHE BOOL "" FORCE)
-set(BUILD_LLM_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(BUILD_SHARED_LIB OFF CACHE BOOL "Force static LLM library" FORCE)
-
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../multimedia/audio ${CMAKE_BINARY_DIR}/_deps/audio)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../model_zoo/stt ${CMAKE_BINARY_DIR}/_deps/stt)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../model_zoo/tts ${CMAKE_BINARY_DIR}/_deps/tts)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../model_zoo/vad ${CMAKE_BINARY_DIR}/_deps/vad)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../model_zoo/llm ${CMAKE_BINARY_DIR}/_deps/llm)
 
 # ============================================================================
 # voice_chat_aec - Full-duplex voice chat with WebRTC AEC + barge-in
@@ -196,26 +294,60 @@ if(USE_AEC)
 
     add_executable(voice_chat_aec ${VOICE_CHAT_AEC_SOURCES})
 
-    target_include_directories(voice_chat_aec PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/inc
-        ${ONNXRUNTIME_INCLUDE_DIR}
-        ${WEBRTC_INCLUDE_DIRS}
-    )
-
     target_compile_definitions(voice_chat_aec PRIVATE USE_AEC)
 
-    target_link_libraries(voice_chat_aec
-        space_audio
-        audio_resampler
-        stt
-        tts
-        vad
-        llm
-        ${ONNXRUNTIME_LIB}
-        ${CURL_LIBRARIES}
-        ${WEBRTC_LIB}
-        pthread
-    )
+    if(VOICE_AGENT_SDK_MODE)
+        # SDK mode: use found paths and libraries
+        target_include_directories(voice_chat_aec PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/inc
+            ${AUDIO_INCLUDE_DIR}
+            ${STT_INCLUDE_DIR}
+            ${TTS_INCLUDE_DIR}
+            ${VAD_INCLUDE_DIR}
+            ${LLM_INCLUDE_DIR}
+            ${ONNXRUNTIME_INCLUDE_DIR}
+            ${WEBRTC_INCLUDE_DIRS}
+        )
+
+        target_link_libraries(voice_chat_aec
+            ${SPACE_AUDIO_LIB}
+            ${AUDIO_RESAMPLER_LIB}
+            ${STT_LIB}
+            ${SENSEVOICE_LIB}
+            ${TTS_LIB}
+            ${VAD_LIB}
+            ${SILERO_VAD_LIB}
+            ${LLM_LIB}
+            ${ONNXRUNTIME_LIB}
+            ${CURL_LIBRARIES}
+            ${WEBRTC_LIB}
+            ${PORTAUDIO_LIBRARIES}
+            ${SNDFILE_LIBRARIES}
+            ${FFTW3_LIBRARIES}
+            pthread
+            m
+        )
+    else()
+        # Standalone mode: use CMake target names (transitive deps resolved automatically)
+        target_include_directories(voice_chat_aec PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/inc
+            ${ONNXRUNTIME_INCLUDE_DIR}
+            ${WEBRTC_INCLUDE_DIRS}
+        )
+
+        target_link_libraries(voice_chat_aec
+            space_audio
+            audio_resampler
+            stt
+            tts
+            vad
+            llm
+            ${ONNXRUNTIME_LIB}
+            ${CURL_LIBRARIES}
+            ${WEBRTC_LIB}
+            pthread
+        )
+    endif()
 
     target_link_directories(voice_chat_aec PRIVATE
         ${PORTAUDIO_LIBRARY_DIRS}
@@ -227,17 +359,31 @@ if(USE_AEC)
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
     )
 
-    # Set RPATH for WebRTC library
-    if(APPLE)
-        set_target_properties(voice_chat_aec PROPERTIES
-            INSTALL_RPATH "@executable_path/../lib;${WEBRTC_BUILD_DIR}/webrtc/modules/audio_processing"
-            BUILD_WITH_INSTALL_RPATH TRUE
-        )
+    # Set RPATH so the executable can find shared libs at runtime
+    if(VOICE_AGENT_SDK_MODE)
+        if(APPLE)
+            set_target_properties(voice_chat_aec PROPERTIES
+                INSTALL_RPATH "@executable_path/../lib"
+                BUILD_WITH_INSTALL_RPATH TRUE
+            )
+        else()
+            set_target_properties(voice_chat_aec PROPERTIES
+                INSTALL_RPATH "$ORIGIN/../lib"
+                BUILD_WITH_INSTALL_RPATH TRUE
+            )
+        endif()
     else()
-        set_target_properties(voice_chat_aec PROPERTIES
-            INSTALL_RPATH "$ORIGIN/../lib:${WEBRTC_BUILD_DIR}/webrtc/modules/audio_processing"
-            BUILD_WITH_INSTALL_RPATH TRUE
-        )
+        if(APPLE)
+            set_target_properties(voice_chat_aec PROPERTIES
+                INSTALL_RPATH "@executable_path/../lib;${WEBRTC_BUILD_DIR}/webrtc/modules/audio_processing"
+                BUILD_WITH_INSTALL_RPATH TRUE
+            )
+        else()
+            set_target_properties(voice_chat_aec PROPERTIES
+                INSTALL_RPATH "$ORIGIN/../lib:${WEBRTC_BUILD_DIR}/webrtc/modules/audio_processing"
+                BUILD_WITH_INSTALL_RPATH TRUE
+            )
+        endif()
     endif()
 
     message(STATUS "Building voice_chat_aec with WebRTC AEC + full-duplex audio")
@@ -245,15 +391,27 @@ if(USE_AEC)
     # Optional MCP support
     if(USE_MCP)
         target_compile_definitions(voice_chat_aec PRIVATE USE_MCP)
-        # Retrieve FetchContent'd nlohmann/json path (populated by modules/mcp)
-        include(FetchContent)
-        FetchContent_GetProperties(json)
-        # Use BEFORE to ensure FetchContent'd json (v3.11.3) takes priority
-        # over system-installed nlohmann-json, preventing ABI mismatch
-        target_include_directories(voice_chat_aec BEFORE PRIVATE
-            ${json_SOURCE_DIR}/include
-        )
-        target_link_libraries(voice_chat_aec mcp_static)
+
+        if(VOICE_AGENT_SDK_MODE)
+            target_include_directories(voice_chat_aec PRIVATE ${MCP_INCLUDE_DIR})
+            if(nlohmann_json_FOUND)
+                target_link_libraries(voice_chat_aec nlohmann_json::nlohmann_json)
+            elseif(NLOHMANN_JSON_INCLUDE_DIR)
+                target_include_directories(voice_chat_aec PRIVATE ${NLOHMANN_JSON_INCLUDE_DIR})
+            endif()
+            target_link_libraries(voice_chat_aec ${MCP_LIB})
+        else()
+            # Standalone: mcp built via add_subdirectory, nlohmann/json via FetchContent
+            include(FetchContent)
+            FetchContent_GetProperties(json)
+            target_include_directories(voice_chat_aec BEFORE PRIVATE
+                ${json_SOURCE_DIR}/include
+            )
+            target_link_libraries(voice_chat_aec mcp_static)
+        endif()
         message(STATUS "  + MCP support enabled for voice_chat_aec")
     endif()
+
+    # Install
+    install(TARGETS voice_chat_aec RUNTIME DESTINATION bin)
 endif()
