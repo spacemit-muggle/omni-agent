@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>voice_agent</name>
+  <version>0.1.0</version>
+  <description>End-to-end voice agent: ASR, TTS, VAD, LLM and AEC (WebRTC) pipeline</description>
+  <depend>audio</depend>
+  <depend>stt</depend>
+  <depend>tts</depend>
+  <depend>vad</depend>
+  <depend>llm</depend>
+  <depend>webrtc-audio-processing</depend>
+  <depend>mcp</depend>
+  <system_depend check="pkg-config --exists portaudio-2.0">portaudio19-dev</system_depend>
+  <system_depend check="pkg-config --exists sndfile">libsndfile1-dev</system_depend>
+  <system_depend check="pkg-config --exists fftw3f">libfftw3-dev</system_depend>
+  <system_depend check="pkg-config --exists libcurl">libcurl4-openssl-dev</system_depend>
+</package>
