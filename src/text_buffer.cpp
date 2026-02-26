@@ -9,7 +9,7 @@
 #include <cstring>
 #include <string>
 
-const char TextBuffer::CHINESE_PUNCTUATION[] = "。！？；.!?;";
+const char TextBuffer::CHINESE_PUNCTUATION[] = "。！？；，：.!?;,:";
 
 TextBuffer::TextBuffer() : stop_flag_(false) {
 }
@@ -124,5 +124,6 @@ void TextBuffer::processBuffer() {
 }
 
 bool TextBuffer::isEndOfSentence(char c) const {
-    return c == '.' || c == '!' || c == '?' || c == ';';
+    return c == '.' || c == '!' || c == '?' || c == ';' ||
+           c == ',' || c == ':' || c == '\n';
 }

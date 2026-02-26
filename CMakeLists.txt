@@ -415,3 +415,125 @@ if(USE_AEC)
     # Install
     install(TARGETS voice_chat_aec RUNTIME DESTINATION bin)
 endif()
+
+# ============================================================================
+# voice_chat - Voice chat without AEC (for hardware with built-in AEC)
+# ============================================================================
+set(VOICE_CHAT_SOURCES
+    examples/main_voice_chat.cpp
+    src/text_buffer.cpp
+)
+
+add_executable(voice_chat ${VOICE_CHAT_SOURCES})
+
+if(VOICE_AGENT_SDK_MODE)
+    target_include_directories(voice_chat PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/inc
+        ${AUDIO_INCLUDE_DIR}
+        ${STT_INCLUDE_DIR}
+        ${TTS_INCLUDE_DIR}
+        ${VAD_INCLUDE_DIR}
+        ${LLM_INCLUDE_DIR}
+        ${ONNXRUNTIME_INCLUDE_DIR}
+    )
+
+    target_link_libraries(voice_chat
+        ${SPACE_AUDIO_LIB}
+        ${AUDIO_RESAMPLER_LIB}
+        ${STT_LIB}
+        ${SENSEVOICE_LIB}
+        ${TTS_LIB}
+        ${VAD_LIB}
+        ${SILERO_VAD_LIB}
+        ${LLM_LIB}
+        ${ONNXRUNTIME_LIB}
+        ${CURL_LIBRARIES}
+        ${PORTAUDIO_LIBRARIES}
+        ${SNDFILE_LIBRARIES}
+        ${FFTW3_LIBRARIES}
+        pthread
+        m
+    )
+else()
+    target_include_directories(voice_chat PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/inc
+        ${ONNXRUNTIME_INCLUDE_DIR}
+    )
+
+    target_link_libraries(voice_chat
+        space_audio
+        audio_resampler
+        stt
+        tts
+        vad
+        llm
+        ${ONNXRUNTIME_LIB}
+        ${CURL_LIBRARIES}
+        pthread
+    )
+endif()
+
+target_link_directories(voice_chat PRIVATE
+    ${PORTAUDIO_LIBRARY_DIRS}
+    ${SNDFILE_LIBRARY_DIRS}
+    ${FFTW3_LIBRARY_DIRS}
+)
+
+set_target_properties(voice_chat PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+)
+
+# Set RPATH
+if(VOICE_AGENT_SDK_MODE)
+    if(APPLE)
+        set_target_properties(voice_chat PROPERTIES
+            INSTALL_RPATH "@executable_path/../lib"
+            BUILD_WITH_INSTALL_RPATH TRUE
+        )
+    else()
+        set_target_properties(voice_chat PROPERTIES
+            INSTALL_RPATH "$ORIGIN/../lib"
+            BUILD_WITH_INSTALL_RPATH TRUE
+        )
+    endif()
+else()
+    if(APPLE)
+        set_target_properties(voice_chat PROPERTIES
+            INSTALL_RPATH "@executable_path/../lib"
+            BUILD_WITH_INSTALL_RPATH TRUE
+        )
+    else()
+        set_target_properties(voice_chat PROPERTIES
+            INSTALL_RPATH "$ORIGIN/../lib"
+            BUILD_WITH_INSTALL_RPATH TRUE
+        )
+    endif()
+endif()
+
+message(STATUS "Building voice_chat (no AEC, independent capture/playback)")
+
+# Optional MCP support
+if(USE_MCP)
+    target_compile_definitions(voice_chat PRIVATE USE_MCP)
+
+    if(VOICE_AGENT_SDK_MODE)
+        target_include_directories(voice_chat PRIVATE ${MCP_INCLUDE_DIR})
+        if(nlohmann_json_FOUND)
+            target_link_libraries(voice_chat nlohmann_json::nlohmann_json)
+        elseif(NLOHMANN_JSON_INCLUDE_DIR)
+            target_include_directories(voice_chat PRIVATE ${NLOHMANN_JSON_INCLUDE_DIR})
+        endif()
+        target_link_libraries(voice_chat ${MCP_LIB})
+    else()
+        include(FetchContent)
+        FetchContent_GetProperties(json)
+        target_include_directories(voice_chat BEFORE PRIVATE
+            ${json_SOURCE_DIR}/include
+        )
+        target_link_libraries(voice_chat mcp_static)
+    endif()
+    message(STATUS "  + MCP support enabled for voice_chat")
+endif()
+
+# Install
+install(TARGETS voice_chat RUNTIME DESTINATION bin)
