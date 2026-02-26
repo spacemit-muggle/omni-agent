@@ -38,10 +38,10 @@
 #include "aec_duplex_processor.hpp"
 
 // 全双工音频（用于列出设备）
-#include "audio_duplex_api.hpp"
+#include "audio_duplex.hpp"
 
 // Resampler (AEC rate <-> 16kHz)
-#include "audio_resampler_api.hpp"
+#include "audio_resampler.hpp"
 
 // STT
 #include "stt_api.hpp"

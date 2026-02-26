@@ -24,7 +24,7 @@
 #include <utility>
 #include <vector>
 
-#include "audio_duplex_api.hpp"
+#include "audio_duplex.hpp"
 
 // Frame size for WebRTC APM (10ms at 48kHz = 480 samples)
 constexpr int kFrameSizeMs = 10;

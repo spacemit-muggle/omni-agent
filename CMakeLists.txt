@@ -119,7 +119,7 @@ if(VOICE_AGENT_SDK_MODE)
     # audio
     find_library(SPACE_AUDIO_LIB NAMES space_audio REQUIRED)
     find_library(AUDIO_RESAMPLER_LIB NAMES audio_resampler REQUIRED)
-    find_path(AUDIO_INCLUDE_DIR NAMES audio_duplex_api.hpp REQUIRED)
+    find_path(AUDIO_INCLUDE_DIR NAMES audio_duplex.hpp REQUIRED)
 
     # stt
     find_library(STT_LIB NAMES stt REQUIRED)
