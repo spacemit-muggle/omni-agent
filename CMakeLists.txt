@@ -179,98 +179,11 @@ endif()
 
 # ============================================================================
 # WebRTC Audio Processing for AEC
+# Always fetch + build to ~/.cache/thirdparty/webrtc-audio-processing (same as lidar).
+# No find_library: webrtc is not required in staging.
 # ============================================================================
 if(USE_AEC)
-    if(VOICE_AGENT_SDK_MODE)
-        # SDK mode: find installed library
-        find_library(WEBRTC_LIB NAMES webrtc-audio-processing-2 REQUIRED)
-
-        # build.sh creates symlink PREFIX/include/webrtc -> webrtc-audio-processing-2
-        find_path(WEBRTC_INCLUDE_DIR
-            NAMES webrtc/modules/audio_processing/include/audio_processing.h
-            REQUIRED
-        )
-
-        # Abseil (may be bundled in PREFIX or system-installed)
-        find_path(ABSEIL_INCLUDE_DIR NAMES absl/base/config.h
-            PATHS
-            ${CMAKE_PREFIX_PATH}/include
-            /usr/include
-            /usr/local/include
-        )
-        if(APPLE AND NOT ABSEIL_INCLUDE_DIR)
-            execute_process(
-                COMMAND brew --prefix abseil
-                OUTPUT_VARIABLE ABSEIL_PREFIX
-                OUTPUT_STRIP_TRAILING_WHITESPACE
-                ERROR_QUIET
-            )
-            if(ABSEIL_PREFIX)
-                set(ABSEIL_INCLUDE_DIR ${ABSEIL_PREFIX}/include)
-            else()
-                set(ABSEIL_INCLUDE_DIR /opt/homebrew/include)
-            endif()
-        endif()
-        if(NOT ABSEIL_INCLUDE_DIR)
-            message(FATAL_ERROR "Abseil not found. Install with: sudo apt install libabsl-dev")
-        endif()
-
-        set(WEBRTC_INCLUDE_DIRS
-            ${WEBRTC_INCLUDE_DIR}
-            ${WEBRTC_INCLUDE_DIR}/webrtc
-            ${ABSEIL_INCLUDE_DIR}
-        )
-    else()
-        # Standalone mode: use source tree paths
-        set(WEBRTC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/webrtc-audio-processing)
-        set(WEBRTC_BUILD_DIR ${WEBRTC_DIR}/build)
-
-        # Check if WebRTC is built
-        if(NOT EXISTS ${WEBRTC_BUILD_DIR}/webrtc/modules/audio_processing/libwebrtc-audio-processing-2.dylib AND
-           NOT EXISTS ${WEBRTC_BUILD_DIR}/webrtc/modules/audio_processing/libwebrtc-audio-processing-2.so)
-            message(FATAL_ERROR "WebRTC Audio Processing not built. Please run: cd thirdparty/webrtc-audio-processing && meson build && ninja -C build")
-        endif()
-
-        # Find abseil
-        if(APPLE)
-            execute_process(
-                COMMAND brew --prefix abseil
-                OUTPUT_VARIABLE ABSEIL_PREFIX
-                OUTPUT_STRIP_TRAILING_WHITESPACE
-                ERROR_QUIET
-            )
-            if(ABSEIL_PREFIX)
-                set(ABSEIL_INCLUDE_DIR ${ABSEIL_PREFIX}/include)
-            else()
-                set(ABSEIL_INCLUDE_DIR /opt/homebrew/include)
-            endif()
-        else()
-            find_path(ABSEIL_INCLUDE_DIR absl/base/config.h
-                PATHS
-                /usr/include
-                /usr/local/include
-                ${WEBRTC_BUILD_DIR}/subprojects/abseil-cpp-20240722.0
-                ${WEBRTC_BUILD_DIR}/subprojects/abseil-cpp
-            )
-            if(NOT ABSEIL_INCLUDE_DIR)
-                message(FATAL_ERROR "Abseil not found. Install with: sudo apt install libabsl-dev")
-            endif()
-        endif()
-
-        set(WEBRTC_INCLUDE_DIRS
-            ${WEBRTC_DIR}
-            ${WEBRTC_DIR}/webrtc
-            ${WEBRTC_BUILD_DIR}
-            ${WEBRTC_BUILD_DIR}/webrtc
-            ${ABSEIL_INCLUDE_DIR}
-        )
-
-        if(APPLE)
-            set(WEBRTC_LIB ${WEBRTC_BUILD_DIR}/webrtc/modules/audio_processing/libwebrtc-audio-processing-2.dylib)
-        else()
-            set(WEBRTC_LIB ${WEBRTC_BUILD_DIR}/webrtc/modules/audio_processing/libwebrtc-audio-processing-2.so)
-        endif()
-    endif()
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/webrtc_audio_processing.cmake)
 
     message(STATUS "WebRTC AEC support enabled")
     message(STATUS "WebRTC library: ${WEBRTC_LIB}")
@@ -295,6 +208,10 @@ if(USE_AEC)
     add_executable(voice_chat_aec ${VOICE_CHAT_AEC_SOURCES})
 
     target_compile_definitions(voice_chat_aec PRIVATE USE_AEC)
+
+    if(NOT VOICE_AGENT_SDK_MODE)
+        add_dependencies(voice_chat_aec webrtc_ap_ep)
+    endif()
 
     if(VOICE_AGENT_SDK_MODE)
         # SDK mode: use found paths and libraries

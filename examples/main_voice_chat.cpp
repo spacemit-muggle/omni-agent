@@ -815,7 +815,7 @@ int main(int argc, char* argv[]) {
     bool mcp_enabled = false;
     std::unique_ptr<mcp::MCPManager> mcp_manager;
     std::string llm_tools_json;
-    std::vector<spacemit_llm::LLMService::ChatMessage> conversation_messages;
+    std::vector<spacemit_llm::ChatMessage> conversation_messages;
     std::thread registry_poll_thread;
     std::mutex tools_mutex;
     std::set<std::string> known_servers;
@@ -898,7 +898,7 @@ int main(int argc, char* argv[]) {
                 std::cout << getTimestamp() << " [MCP] 警告: 无可用服务器，继续等待...\n";
             }
 
-            conversation_messages.push_back(spacemit_llm::LLMService::ChatMessage::System(mcp_cfg.system_prompt));
+            conversation_messages.push_back(spacemit_llm::ChatMessage::System(mcp_cfg.system_prompt));
 
             if (!mcp_cfg.registry_url.empty()) {
                 std::cout << getTimestamp() << " [MCP] 启动注册中心轮询: " << mcp_cfg.registry_url << "\n";
@@ -1148,7 +1148,7 @@ int main(int argc, char* argv[]) {
 #ifdef USE_MCP
         // MCP 模式：支持工具调用
         if (mcp_enabled) {
-            conversation_messages.push_back(spacemit_llm::LLMService::ChatMessage::User(text));
+            conversation_messages.push_back(spacemit_llm::ChatMessage::User(text));
 
             const int MAX_TOOL_ROUNDS = 10;
             int round = 0;
@@ -1193,7 +1193,7 @@ int main(int argc, char* argv[]) {
                     std::cout << getTimestamp() << " [Tool Call] 检测到工具调用\n";
 
                     conversation_messages.push_back(
-                        spacemit_llm::LLMService::ChatMessage::Assistant(result.content, result.tool_calls_json));
+                        spacemit_llm::ChatMessage::Assistant(result.content, result.tool_calls_json));
 
                     try {
                         auto tool_calls = json::parse(result.tool_calls_json);
@@ -1227,7 +1227,7 @@ int main(int argc, char* argv[]) {
 
                             std::string tc_id = tc.value("id", "");
                             conversation_messages.push_back(
-                                spacemit_llm::LLMService::ChatMessage::Tool(result_text, tc_id));
+                                spacemit_llm::ChatMessage::Tool(result_text, tc_id));
                         }
                     } catch (const std::exception& e) {
                         std::cerr << getTimestamp() << " [MCP] 工具调用解析错误: " << e.what() << std::endl;
@@ -1239,7 +1239,7 @@ int main(int argc, char* argv[]) {
                 }
 
                 conversation_messages.push_back(
-                    spacemit_llm::LLMService::ChatMessage::Assistant(result.content));
+                    spacemit_llm::ChatMessage::Assistant(result.content));
 
                 if (!g_barge_in) {
                     text_buffer.stop();
@@ -1258,9 +1258,9 @@ int main(int argc, char* argv[]) {
             std::cout << getTimestamp() << " [LLM] 开始生成...\n";
             std::cout << getTimestamp() << " [AI]: " << std::flush;
 
-            std::vector<spacemit_llm::LLMService::ChatMessage> msgs;
-            msgs.push_back(spacemit_llm::LLMService::ChatMessage::System(system_prompt));
-            msgs.push_back(spacemit_llm::LLMService::ChatMessage::User(text));
+            std::vector<spacemit_llm::ChatMessage> msgs;
+            msgs.push_back(spacemit_llm::ChatMessage::System(system_prompt));
+            msgs.push_back(spacemit_llm::ChatMessage::User(text));
 
             auto result = llm->chat_stream(msgs,
                 [&](const std::string& chunk, bool is_done, const std::string& error) -> bool {
