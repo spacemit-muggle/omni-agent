@@ -43,13 +43,13 @@
 #include "audio_resampler.hpp"
 
 // STT
-#include "stt_api.hpp"
+#include "stt_service.h"
 
 // TTS
-#include "tts_api.hpp"
+#include "tts_service.h"
 
 // VAD
-#include "vad_api.hpp"
+#include "vad_service.h"
 
 // LLM
 #include "llm_service.h"

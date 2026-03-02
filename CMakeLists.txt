@@ -124,16 +124,16 @@ if(VOICE_AGENT_SDK_MODE)
     # stt
     find_library(STT_LIB NAMES stt REQUIRED)
     find_library(SENSEVOICE_LIB NAMES sensevoice REQUIRED)
-    find_path(STT_INCLUDE_DIR NAMES stt_api.hpp REQUIRED)
+    find_path(STT_INCLUDE_DIR NAMES stt_service.h REQUIRED)
 
     # tts (headers installed to include/tts/)
     find_library(TTS_LIB NAMES tts REQUIRED)
-    find_path(TTS_INCLUDE_DIR NAMES tts_api.hpp PATH_SUFFIXES tts REQUIRED)
+    find_path(TTS_INCLUDE_DIR NAMES tts_service.h PATH_SUFFIXES tts REQUIRED)
 
     # vad
     find_library(VAD_LIB NAMES vad REQUIRED)
     find_library(SILERO_VAD_LIB NAMES silero_vad REQUIRED)
-    find_path(VAD_INCLUDE_DIR NAMES vad_api.hpp REQUIRED)
+    find_path(VAD_INCLUDE_DIR NAMES vad_service.h REQUIRED)
 
     # llm
     find_library(LLM_LIB NAMES llm_service_cpp REQUIRED)
