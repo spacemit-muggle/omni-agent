@@ -124,7 +124,7 @@ if(VOICE_AGENT_SDK_MODE)
     # stt
     find_library(STT_LIB NAMES stt REQUIRED)
     find_library(SENSEVOICE_LIB NAMES sensevoice REQUIRED)
-    find_path(STT_INCLUDE_DIR NAMES stt_service.h REQUIRED)
+    find_path(STT_INCLUDE_DIR NAMES asr_service.h REQUIRED)
 
     # tts (headers installed to include/tts/)
     find_library(TTS_LIB NAMES tts REQUIRED)
