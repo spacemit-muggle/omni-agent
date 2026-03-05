@@ -687,7 +687,7 @@ int main(int argc, char* argv[]) {
     // -------------------------------------------------------------------------
     std::cout << getTimestamp() << " [2/5] 初始化 VAD..." << std::flush;
 
-    auto vad_config = SpacemiT::VadConfig::Silero()
+    auto vad_config = SpacemiT::VadConfig::Preset("silero")
         .withTriggerThreshold(cfg.vad_threshold)
         .withStopThreshold(cfg.vad_threshold - 0.15f);
 
