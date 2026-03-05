@@ -81,7 +81,7 @@ function(fetch_thirdparty)
       endif()
     endif()
     if(NOT _res EQUAL 0)
-      message(FATAL_ERROR "fetch_thirdparty: failed to update ${ARG_NAME} (${_res})")
+      message(WARNING "fetch_thirdparty: failed to update ${ARG_NAME} (${_res}), using existing cache")
     endif()
   endif()
 
