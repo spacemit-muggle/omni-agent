@@ -60,11 +60,7 @@ public:
         // Audio settings
         int sample_rate = 48000;           // 48kHz recommended for AEC
         int channels = 1;
-#ifdef __linux__
-        int frames_per_buffer = 960;       // Linux: 20ms @ 48kHz (避免 ALSA underrun)
-#else
-        int frames_per_buffer = 480;       // macOS: 10ms @ 48kHz
-#endif
+        int frames_per_buffer = 480;       // 10ms @ 48kHz
         int input_device = -1;             // -1 for default
         int output_device = -1;            // -1 for default
 

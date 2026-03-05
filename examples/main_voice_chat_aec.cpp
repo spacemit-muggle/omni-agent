@@ -125,7 +125,7 @@ Config parseArgs(int argc, char* argv[]) {
                 << "  --no-ns                   禁用噪声抑制\n"
                 << "  --agc                     启用自动增益控制 (默认禁用)\n"
                 << "  --aec-delay <ms>          AEC延迟补偿 (默认: 50ms, 范围: 20-100ms)\n"
-                << "  --buffer-frames <n>       音频缓冲帧数 (默认: macOS 480, Linux 960)\n"
+                << "  --buffer-frames <n>       音频缓冲帧数 (默认: 480)\n"
                 << "  --sample-rate <hz>        音频采样率 (默认: 48000, 常用: 44100, 48000)\n"
                 << "\n调试:\n"
                 << "  --save-audio [file]       保存AEC处理后的音频 (默认: aec_debug.wav)\n"
