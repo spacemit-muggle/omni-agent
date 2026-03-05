@@ -251,6 +251,13 @@ if(USE_AEC)
         message(STATUS "  + MCP support enabled for voice_chat_aec")
     endif()
 
+    # Install WebRTC shared library to lib/
+    get_filename_component(_WEBRTC_LIB_DIR "${WEBRTC_LIB}" DIRECTORY)
+    install(FILES "${_WEBRTC_LIB_DIR}/libwebrtc-audio-processing-2.so.1" DESTINATION lib)
+    install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
+        libwebrtc-audio-processing-2.so.1
+        \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/lib/libwebrtc-audio-processing-2.so)")
+
     install(TARGETS voice_chat_aec RUNTIME DESTINATION bin)
 endif()
 
