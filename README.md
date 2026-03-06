@@ -43,6 +43,9 @@ SpacemiT 语音对话系统，集成 VAD + ASR + LLM + TTS + MCP 工具调用的
 source build/envsetup.sh
 lunch k3-com260-minimal    # 或其他目标
 
+# 一键编译（构建 omni_agent 及其所有依赖）
+m
+
 # 标准构建（不含 AEC）
 cd application/native/omni_agent && mm
 
