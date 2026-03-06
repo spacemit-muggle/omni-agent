@@ -124,6 +124,6 @@ void TextBuffer::processBuffer() {
 }
 
 bool TextBuffer::isEndOfSentence(char c) const {
-    return c == '.' || c == '!' || c == '?' || c == ';' ||
-           c == ',' || c == ':' || c == '\n';
+    return c == '.' || c == '!' || c == '?' || c == ';' || c == ',' ||
+        c == ':' || c == '\n';
 }

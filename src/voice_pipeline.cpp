@@ -4,16 +4,20 @@
  */
 
 #include "voice_pipeline.hpp"
-#include "voice_common.hpp"
-#include "text_buffer.hpp"
 
-#include <iostream>
-#include <iomanip>
 #include <deque>
+#include <iomanip>
+#include <iostream>
+#include <string>
+#include <vector>
+
+#include "text_buffer.hpp"
+#include "voice_common.hpp"
 
 #ifdef USE_MCP
-#include "mcp_helper.hpp"
 #include <nlohmann/json.hpp>
+
+#include "mcp_helper.hpp"
 using json = nlohmann::json;
 #endif
 

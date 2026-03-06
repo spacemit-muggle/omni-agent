@@ -6,12 +6,17 @@
 #ifdef USE_MCP
 
 #include "mcp_helper.hpp"
-#include "voice_common.hpp"
 
-#include <iostream>
-#include <fstream>
 #include <curl/curl.h>
+
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
+
 #include <nlohmann/json.hpp>
+
+#include "voice_common.hpp"
 
 using json = nlohmann::json;
 

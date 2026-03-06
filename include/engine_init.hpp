@@ -29,7 +29,7 @@ struct LLMInitResult {
 };
 
 LLMInitResult initLLM(const std::string& llm_model, const std::string& llm_url,
-                       const std::string& default_system_prompt, int max_tokens);
+    const std::string& default_system_prompt, int max_tokens);
 
 std::shared_ptr<SpacemiT::VadEngine> initVAD(float vad_threshold);
 
@@ -55,11 +55,11 @@ struct MCPInitResult {
 };
 
 void initMCP(const std::string& mcp_config_path,
-             std::shared_ptr<spacemit_llm::LLMService>& llm,
-             std::string& system_prompt,
-             MCPInitResult& result,
-             const std::string& cli_llm_url = "",
-             const std::string& cli_llm_model = "");
+    std::shared_ptr<spacemit_llm::LLMService>& llm,
+    std::string& system_prompt,
+    MCPInitResult& result,
+    const std::string& cli_llm_url = "",
+    const std::string& cli_llm_model = "");
 #endif
 
 #endif  // ENGINE_INIT_HPP
