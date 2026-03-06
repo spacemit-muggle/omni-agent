@@ -88,10 +88,10 @@ endif()
 
 # Options
 option(USE_MCP "Enable MCP (Model Context Protocol) support" ON)
-option(USE_AEC "Enable WebRTC AEC (Acoustic Echo Cancellation) for barge-in support" ON)
+option(USE_AEC "Enable WebRTC AEC (Acoustic Echo Cancellation) for barge-in support" OFF)
 
 # Include directories
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/inc)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${ONNXRUNTIME_INCLUDE_DIR})
 include_directories(${FFTW3_INCLUDE_DIRS})
 
@@ -161,7 +161,7 @@ set(VOICE_AGENT_COMMON_SOURCES
 )
 
 set(VOICE_AGENT_INCLUDE_DIRS
-    ${CMAKE_CURRENT_SOURCE_DIR}/inc
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${AUDIO_INCLUDE_DIR}
     ${STT_INCLUDE_DIR}
     ${TTS_INCLUDE_DIR}
@@ -201,7 +201,7 @@ set(VOICE_AGENT_LINK_DIRS
 # ============================================================================
 if(USE_AEC)
     add_executable(voice_chat_aec
-        examples/main_voice_chat_aec.cpp
+        examples/voice_chat_aec.cpp
         src/aec_duplex_processor.cpp
         ${VOICE_AGENT_COMMON_SOURCES}
     )
@@ -265,7 +265,7 @@ endif()
 # voice_chat - Voice chat without AEC (for hardware with built-in AEC)
 # ============================================================================
 add_executable(voice_chat
-    examples/main_voice_chat.cpp
+    examples/voice_chat.cpp
     ${VOICE_AGENT_COMMON_SOURCES}
 )
 

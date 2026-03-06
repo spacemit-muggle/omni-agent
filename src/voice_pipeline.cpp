@@ -28,6 +28,8 @@ void processText(VoicePipelineContext& ctx, const std::string& text) {
     TextBuffer text_buffer;
     std::string full_response;
     int sentence_count = 0;
+    int total_duration_ms = 0;
+    int total_processing_ms = 0;
 
     auto synthesizeSentence = [&](const std::string& sentence) {
         if (sentence.empty() || g_barge_in || !g_running) return;
@@ -35,6 +37,12 @@ void processText(VoicePipelineContext& ctx, const std::string& text) {
         sentence_count++;
         auto result = ctx.tts->Call(sentence);
         if (result && result->IsSuccess() && !g_barge_in) {
+            total_duration_ms += result->GetDurationMs();
+            total_processing_ms += result->GetProcessingTimeMs();
+            std::cout << getTimestamp() << " [TTS] 句" << sentence_count
+                << ": \"" << sentence << "\" "
+                << result->GetDurationMs() << "ms, "
+                << "RTF=" << std::fixed << std::setprecision(3) << result->GetRTF() << "\n";
             auto audio_bytes = result->GetAudioData();
             if (!audio_bytes.empty()) {
                 auto float_samples = pcm16BytesToFloat(audio_bytes);
@@ -200,7 +208,13 @@ void processText(VoicePipelineContext& ctx, const std::string& text) {
     }
 
     if (sentence_count > 0) {
-        std::cout << getTimestamp() << " [TTS] 流式合成完成 (" << sentence_count << " 句)\n";
+        float avg_rtf = total_duration_ms > 0
+            ? static_cast<float>(total_processing_ms) / total_duration_ms : 0.0f;
+        std::cout << getTimestamp() << " [TTS] 流式合成完成 ("
+            << sentence_count << " 句, "
+            << "音频=" << std::fixed << std::setprecision(1) << (total_duration_ms / 1000.0f) << "s, "
+            << "耗时=" << (total_processing_ms / 1000.0f) << "s, "
+            << "RTF=" << std::setprecision(3) << avg_rtf << ")\n";
     }
 
     // Wait for playback to finish
