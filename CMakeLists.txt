@@ -91,7 +91,7 @@ option(USE_MCP "Enable MCP (Model Context Protocol) support" ON)
 option(USE_AEC "Enable WebRTC AEC (Acoustic Echo Cancellation) for barge-in support" ON)
 
 # Include directories
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/inc)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${ONNXRUNTIME_INCLUDE_DIR})
 include_directories(${FFTW3_INCLUDE_DIRS})
 
@@ -161,7 +161,7 @@ set(VOICE_AGENT_COMMON_SOURCES
 )
 
 set(VOICE_AGENT_INCLUDE_DIRS
-    ${CMAKE_CURRENT_SOURCE_DIR}/inc
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${AUDIO_INCLUDE_DIR}
     ${STT_INCLUDE_DIR}
     ${TTS_INCLUDE_DIR}
