@@ -19,7 +19,7 @@
 #include "tts_service.h"
 
 #ifdef USE_MCP
-#include <mcp_api.hpp>
+#include <mcp_service.hpp>
 #include "mcp_helper.hpp"
 #endif
 
@@ -57,7 +57,9 @@ struct MCPInitResult {
 void initMCP(const std::string& mcp_config_path,
              std::shared_ptr<spacemit_llm::LLMService>& llm,
              std::string& system_prompt,
-             MCPInitResult& result);
+             MCPInitResult& result,
+             const std::string& cli_llm_url = "",
+             const std::string& cli_llm_model = "");
 #endif
 
 #endif  // ENGINE_INIT_HPP

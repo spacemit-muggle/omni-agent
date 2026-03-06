@@ -99,7 +99,9 @@ TTSInitResult initTTS(const std::string& tts_type) {
 void initMCP(const std::string& mcp_config_path,
              std::shared_ptr<spacemit_llm::LLMService>& llm,
              std::string& system_prompt,
-             MCPInitResult& result) {
+             MCPInitResult& result,
+             const std::string& cli_llm_url,
+             const std::string& cli_llm_model) {
     if (mcp_config_path.empty()) return;
 
     std::cout << getTimestamp() << " [MCP] 加载配置: " << mcp_config_path << "\n";
@@ -111,10 +113,17 @@ void initMCP(const std::string& mcp_config_path,
 
     result.enabled = true;
 
-    llm->update_model(result.config.model);
+    // model: CLI > config
+    if (cli_llm_model.empty()) {
+        llm->update_model(result.config.model);
+    }
+
+    // system_prompt: config always overrides (no CLI option for this)
     llm->update_prompt(result.config.system_prompt);
     system_prompt = result.config.system_prompt;
-    if (!result.config.url.empty()) {
+
+    // url: CLI > config
+    if (cli_llm_url.empty() && !result.config.url.empty()) {
         std::string api_base = result.config.url;
         if (api_base.back() == '/') api_base.pop_back();
         if (api_base.size() < 3 || api_base.substr(api_base.size() - 3) != "/v1") {
@@ -122,8 +131,11 @@ void initMCP(const std::string& mcp_config_path,
         }
         llm->update_api_settings(api_base, "EMPTY");
     }
-    std::cout << getTimestamp() << " [MCP] LLM后端: " << result.config.url << "\n";
-    std::cout << getTimestamp() << " [MCP] 模型: " << result.config.model << "\n";
+
+    std::cout << getTimestamp() << " [MCP] LLM后端: "
+        << (cli_llm_url.empty() ? result.config.url : cli_llm_url) << "\n";
+    std::cout << getTimestamp() << " [MCP] 模型: "
+        << (cli_llm_model.empty() ? result.config.model : cli_llm_model) << "\n";
 
     result.manager = std::make_unique<mcp::MCPManager>();
 

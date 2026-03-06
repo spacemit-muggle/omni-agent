@@ -19,7 +19,7 @@
 #include "vad_service.h"
 
 #ifdef USE_MCP
-#include <mcp_api.hpp>
+#include <mcp_service.hpp>
 #endif
 
 using PlaybackCallback = std::function<void(const std::vector<float>& samples, int sample_rate)>;

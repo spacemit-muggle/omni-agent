@@ -10,7 +10,7 @@
 
 #include <string>
 #include <vector>
-#include <mcp_api.hpp>
+#include <mcp_service.hpp>
 
 struct MCPConfig {
     std::string backend = "openai";

@@ -125,7 +125,7 @@ find_path(LLM_INCLUDE_DIR NAMES llm_service.h REQUIRED)
 # mcp
 if(USE_MCP)
     find_library(MCP_LIB NAMES mcp REQUIRED)
-    find_path(MCP_INCLUDE_DIR NAMES mcp_api.hpp REQUIRED)
+    find_path(MCP_INCLUDE_DIR NAMES mcp_service.hpp REQUIRED)
     find_package(nlohmann_json QUIET)
     if(NOT nlohmann_json_FOUND)
         find_path(NLOHMANN_JSON_INCLUDE_DIR NAMES nlohmann/json.hpp)

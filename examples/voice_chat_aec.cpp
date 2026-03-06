@@ -68,6 +68,9 @@ struct Config {
 
     // MCP 配置
     std::string mcp_config_path = "";
+
+    // 跟踪 --model 是否被显式指定
+    bool llm_model_set = false;
 };
 
 Config parseArgs(int argc, char* argv[]) {
@@ -77,6 +80,7 @@ Config parseArgs(int argc, char* argv[]) {
             cfg.tts_type = argv[++i];
         } else if (strcmp(argv[i], "--model") == 0 && i + 1 < argc) {
             cfg.llm_model = argv[++i];
+            cfg.llm_model_set = true;
         } else if ((strcmp(argv[i], "--llm-url") == 0 || strcmp(argv[i], "--llm_url") == 0) && i + 1 < argc) {
             cfg.llm_url = argv[++i];
         } else if ((strcmp(argv[i], "--input-device") == 0 || strcmp(argv[i], "-i") == 0) && i + 1 < argc) {
@@ -314,7 +318,9 @@ int main(int argc, char* argv[]) {
     // -------------------------------------------------------------------------
 #ifdef USE_MCP
     MCPInitResult mcp;
-    initMCP(cfg.mcp_config_path, llm, system_prompt, mcp);
+    initMCP(cfg.mcp_config_path, llm, system_prompt, mcp,
+            cfg.llm_url,
+            cfg.llm_model_set ? cfg.llm_model : "");
 #endif
 
     // -------------------------------------------------------------------------
