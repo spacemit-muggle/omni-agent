@@ -201,7 +201,7 @@ set(VOICE_AGENT_LINK_DIRS
 # ============================================================================
 if(USE_AEC)
     add_executable(voice_chat_aec
-        examples/main_voice_chat_aec.cpp
+        examples/voice_chat_aec.cpp
         src/aec_duplex_processor.cpp
         ${VOICE_AGENT_COMMON_SOURCES}
     )
@@ -265,7 +265,7 @@ endif()
 # voice_chat - Voice chat without AEC (for hardware with built-in AEC)
 # ============================================================================
 add_executable(voice_chat
-    examples/main_voice_chat.cpp
+    examples/voice_chat.cpp
     ${VOICE_AGENT_COMMON_SOURCES}
 )
 
