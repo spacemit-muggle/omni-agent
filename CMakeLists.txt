@@ -88,7 +88,7 @@ endif()
 
 # Options
 option(USE_MCP "Enable MCP (Model Context Protocol) support" ON)
-option(USE_AEC "Enable WebRTC AEC (Acoustic Echo Cancellation) for barge-in support" ON)
+option(USE_AEC "Enable WebRTC AEC (Acoustic Echo Cancellation) for barge-in support" OFF)
 
 # Include directories
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
