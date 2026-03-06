@@ -20,7 +20,7 @@ else()
   set(_WEBRTC_CACHE "${CMAKE_BINARY_DIR}/.cache/thirdparty")
 endif()
 
-set(_WEBRTC_GIT_REPO "https://gitlab.freedesktop.org/pulseaudio/webrtc-audio-processing.git")
+set(_WEBRTC_GIT_REPO "https://github.com/spacemit-robotics/webrtc-audio-processing.git")
 if(DEFINED ENV{SROBOTIS_WEBRTC_GIT_REPO})
   set(_WEBRTC_GIT_REPO "$ENV{SROBOTIS_WEBRTC_GIT_REPO}")
 endif()
