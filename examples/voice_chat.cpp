@@ -17,6 +17,7 @@
 
 #include <iostream>
 #include <string>
+#include <algorithm>
 #include <atomic>
 #include <mutex>
 #include <thread>
@@ -28,6 +29,7 @@
 #include <memory>
 #include <queue>
 #include <condition_variable>
+#include <utility>
 #include <vector>
 #include <cmath>
 
@@ -316,8 +318,9 @@ int main(int argc, char* argv[]) {
             std::vector<uint8_t> chunk;
             {
                 std::unique_lock<std::mutex> lock(playback_mutex);
-                playback_cv.wait_for(lock, std::chrono::milliseconds(20),
-                                     [&] { return !playback_queue.empty() || !g_running; });
+                playback_cv.wait_for(
+                    lock, std::chrono::milliseconds(20),
+                    [&] { return !playback_queue.empty() || !g_running; });
                 if (!g_running) break;
                 if (!playback_queue.empty()) {
                     chunk = std::move(playback_queue.front());
@@ -380,9 +383,8 @@ int main(int argc, char* argv[]) {
             std::lock_guard<std::mutex> lock(playback_mutex);
             for (size_t offset = 0; offset < pcm_bytes.size(); offset += chunk_bytes) {
                 size_t len = std::min(chunk_bytes, pcm_bytes.size() - offset);
-                playback_queue.push(
-                    std::vector<uint8_t>(pcm_bytes.data() + offset,
-                                         pcm_bytes.data() + offset + len));
+                playback_queue.push(std::vector<uint8_t>(
+                    pcm_bytes.data() + offset, pcm_bytes.data() + offset + len));
             }
         }
         playback_cv.notify_one();

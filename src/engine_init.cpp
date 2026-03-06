@@ -4,19 +4,25 @@
  */
 
 #include "engine_init.hpp"
-#include "voice_common.hpp"
 
 #include <iostream>
 #include <map>
+#include <memory>
+#include <set>
+#include <string>
+#include <vector>
+
+#include "voice_common.hpp"
 
 #ifdef USE_MCP
-#include "mcp_helper.hpp"
 #include <nlohmann/json.hpp>
+
+#include "mcp_helper.hpp"
 using json = nlohmann::json;
 #endif
 
 LLMInitResult initLLM(const std::string& llm_model, const std::string& llm_url,
-                       const std::string& default_system_prompt, int max_tokens) {
+    const std::string& default_system_prompt, int max_tokens) {
     LLMInitResult result;
     result.system_prompt = default_system_prompt;
 
@@ -97,9 +103,9 @@ TTSInitResult initTTS(const std::string& tts_type) {
 #ifdef USE_MCP
 
 void initMCP(const std::string& mcp_config_path,
-             std::shared_ptr<spacemit_llm::LLMService>& llm,
-             std::string& system_prompt,
-             MCPInitResult& result) {
+    std::shared_ptr<spacemit_llm::LLMService>& llm,
+    std::string& system_prompt,
+    MCPInitResult& result) {
     if (mcp_config_path.empty()) return;
 
     std::cout << getTimestamp() << " [MCP] 加载配置: " << mcp_config_path << "\n";

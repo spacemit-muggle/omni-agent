@@ -5,6 +5,10 @@
 
 #include "voice_common.hpp"
 
+#include <memory>
+#include <string>
+#include <vector>
+
 #include <iostream>
 #include <iomanip>
 #include <sstream>
