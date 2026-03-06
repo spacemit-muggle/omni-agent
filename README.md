@@ -77,7 +77,7 @@ voice_chat --llm-url http://localhost:8080 --model qwen2.5:7b --tts matcha:zn-en
 pip install mcp starlette uvicorn psutil
 # 启动注册中心
 ./components/smart_voice/mcp/examples/start_all_services.sh
-voice_chat --llm-url http://localhost:8080 --mcp-config ./components/smart_voice/mcp/examples/config_registry.json
+voice_chat --llm-url http://localhost:8080 --mcp-config ./components/smart_voice/mcp/examples/configs/config_registry.json
 ```
 
 ## 两种模式
@@ -185,7 +185,7 @@ omni_agent 通过 [MCP (Model Context Protocol)](https://modelcontextprotocol.io
   "name": "Calculator",
   "type": "stdio",
   "command": "python3",
-  "args": ["services/calculator_stdio.py"]
+  "args": ["examples/services/calculator/stdio_server.py"]
 }
 ```
 
@@ -229,7 +229,7 @@ omni_agent 通过 [MCP (Model Context Protocol)](https://modelcontextprotocol.io
       "name": "Calculator",
       "type": "stdio",
       "command": "python3",
-      "args": ["services/calculator_stdio.py"]
+      "args": ["examples/services/calculator/stdio_server.py"]
     },
     {
       "name": "SystemMonitor",
@@ -252,11 +252,9 @@ MCP 服务可以用任何语言实现。详细的开发指南和示例参见 [mc
 
 Python 示例服务：
 
-- `calculator_stdio.py` — stdio 传输的计算器服务
-- `calculator_http.py` — HTTP 传输的计算器服务
-- `calculator_socket.py` — Unix Socket 传输的计算器服务
-- `time_stdio.py` / `time_http.py` / `time_socket.py` — 时间查询服务
-- `system_monitor_http.py` — 系统监控服务
+- `services/calculator/` — 计算器 (stdio_server.py / socket_server.py / http_server.py)
+- `services/time/` — 时间查询 (stdio_server.py / socket_server.py / http_server.py)
+- `services/system_monitor/` — 系统监控 (http_server.py)
 
 C 语言 MCP 服务（用于嵌入式设备）参见 `components/smart_voice/mlink/device/`，通过 `mlink_tool_create()` 注册工具。
 
